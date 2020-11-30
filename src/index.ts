@@ -27,7 +27,8 @@ export type predictionType = {
 
 const BASE_PATH =
   // OLD S3 "https://s3.amazonaws.com/ir_public/nsfwjscdn/TFJS_nsfw_mobilenet/tfjs_quant_nsfw_mobilenet/";
-  "http://d1zv2aa70wpiur.cloudfront.net/tfjs_quant_nsfw_mobilenet/";
+  // "http://d1zv2aa70wpiur.cloudfront.net/tfjs_quant_nsfw_mobilenet/";
+  `file:///${__dirname}/../model/`;
 const IMAGE_SIZE = 224; // default to Mobilenet v2
 
 export async function load(base = BASE_PATH, options = { size: IMAGE_SIZE }) {
