@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
+import * as tfnode from "@tensorflow/tfjs-node";
 import { NSFW_CLASSES } from "./nsfw_classes";
 import gifFrames, { GifFrameCanvas, GifFrameBuffer } from "@nsfw-filter/gif-frames";
 
@@ -27,8 +28,7 @@ export type predictionType = {
 
 const BASE_PATH =
   // OLD S3 "https://s3.amazonaws.com/ir_public/nsfwjscdn/TFJS_nsfw_mobilenet/tfjs_quant_nsfw_mobilenet/";
-  // "http://d1zv2aa70wpiur.cloudfront.net/tfjs_quant_nsfw_mobilenet/";
-  `file:///${__dirname}/../model/`;
+  "http://d1zv2aa70wpiur.cloudfront.net/tfjs_quant_nsfw_mobilenet/";
 const IMAGE_SIZE = 224; // default to Mobilenet v2
 
 export async function load(base = BASE_PATH, options = { size: IMAGE_SIZE }) {
@@ -36,6 +36,12 @@ export async function load(base = BASE_PATH, options = { size: IMAGE_SIZE }) {
     throw new Error(
       `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
         `also include @tensorflow/tfjs on the page before using this model.`
+    );
+  }
+  if (tfnode == null) {
+    throw new Error(
+      `Cannot find tfjs-node. This optional dependency is required
+        if you are trying to serve your model locally`
     );
   }
   // Default size is IMAGE_SIZE - needed if just type option is used
@@ -79,7 +85,9 @@ export class NSFWJS {
       this.model = await tf.loadGraphModel(this.pathOrIOHandler);
     } else {
       // this is a Layers Model
-      this.model = await tf.loadLayersModel(this.pathOrIOHandler);
+      const handler = tfnode.io.fileSystem("./quant_nsfw_mobilenet/model.json");
+      this.model = await tf.loadLayersModel(handler);
+      // this.model = await tf.loadLayersModel(this.pathOrIOHandler);
       this.endpoints = this.model.layers.map((l) => l.name);
     }
 
